@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from Database.models import Admins, User, Project
+from Database.models import Admins, User, Project, Base
 
 
 class DataBase:
@@ -23,6 +23,8 @@ class DataBase:
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
         await self.session.close()
+
+
 
     async def get_admin(self, admin_id: int) -> Optional[Admins]:
         async with self.Session() as session:

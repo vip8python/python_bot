@@ -139,9 +139,9 @@ class ProjectReview(Base):
     reviewer = relationship("User")
 
 
-class Admins(Base):
+class Admin(Base):
     __tablename__ = 'admins'
 
-    id = Column(primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(100), nullable=False)
     telegram_id = Column(String(100))
