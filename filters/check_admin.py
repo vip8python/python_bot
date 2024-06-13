@@ -1,16 +1,14 @@
 import logging
-from typing import Optional
-
 from aiogram.filters import BaseFilter
 from aiogram.types import Message
-from Database.database import DataBase
-from Database.models import Admins
+from database import DataBase
+
 
 logger = logging.getLogger('info')
 
 
 class CheckAdmin(BaseFilter):
-    async def __call__(self, message: Message) -> Optional[Admins]:
+    async def __call__(self, message: Message):
         try:
             async with DataBase() as db:
                 return await db.get_admin(message.from_user.id)

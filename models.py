@@ -86,20 +86,6 @@ class Project(Base):
     participants = relationship("UserProject", back_populates="project", cascade="all, delete-orphan")
     employees = relationship("ProjectEmployee", back_populates="project")
 
-    def add_participant(self, user):
-        if len(self.participants) < self.participants_needed:
-            new_participant = UserProject(user_id=user.id, project_id=self.id)
-            self.participants.append(new_participant)
-        else:
-            raise ValueError("Cannot add more participants, the project is full.")
-
-    def remove_participant(self, user):
-        for participant in self.participants:
-            if participant.user_id == user.id:
-                self.participants.remove(participant)
-                return
-        raise ValueError("User is not a participant of this project.")
-
 
 class ProjectEmployee(Base):
     __tablename__ = 'project_employees'

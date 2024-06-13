@@ -1,23 +1,18 @@
-from aiogram import F, Router
+from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import CommandStart, Command
-from Handlers.keyboards import start_kb, all_categories, all_qualification, add_more_employees
-from State.state import CreateTask
+
+from keyboards.create_task_kb import all_categories_kb, all_qualification_kb, add_more_employees_kb
+from states.create_task_state import CreateTask
 
 router = Router()
 storage = MemoryStorage()
 
 
-@router.message(CommandStart())
-async def cmd_start(message: Message):
-    await message.answer('Hello', reply_markup=start_kb)
-
-
 @router.message(F.text == 'create task')
 async def categories(message: Message, state: FSMContext):
-    await message.answer('Frameworks', reply_markup=await all_categories())
+    await message.answer('Frameworks', reply_markup=await all_categories_kb())
     await state.set_state(CreateTask.framework)
 
 
@@ -33,7 +28,7 @@ async def category_selected(call: CallbackQuery, state: FSMContext):
 @router.message(CreateTask.name)
 async def enter_name(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer('Select what qualification employees are needed.', reply_markup=await all_qualification())
+    await message.answer('Select what qualification employees are needed.', reply_markup=await all_qualification_kb())
     await state.set_state(CreateTask.qualification)
 
 
@@ -58,12 +53,12 @@ async def enter_number_of_employees(message: Message, state: FSMContext):
         employees_list[-1]['employees_count'] = employees_count
     await state.update_data(employees_list=employees_list)
     employees_info = ", ".join([f"{e['employees_count']} {e['qualification']['name']}" for e in employees_list])
-    await message.answer(f'You have {employees_info} employees.', reply_markup=await add_more_employees())
+    await message.answer(f'You have {employees_info} employees.', reply_markup=await add_more_employees_kb())
 
 
 @router.callback_query(F.data == 'more_employees')
 async def more_employees_selected(call: CallbackQuery, state: FSMContext):
-    await call.message.answer('Please enter more qualification', reply_markup=await all_qualification())
+    await call.message.answer('Please enter more qualification', reply_markup=await all_qualification_kb())
     await state.set_state(CreateTask.qualification)
 
 

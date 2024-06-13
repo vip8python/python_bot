@@ -2,16 +2,17 @@ import asyncio
 import logging
 import logging.config
 import os
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine
-from Core.Logging.formatters import CustomJsonFormatter
-from Core.menu import set_commands
-from Database.database import DataBase
-from Database.models import Base
-from Handlers.handlers import router
+from core.logging.formatters import CustomJsonFormatter
+from core.menu import set_commands
+from models import Base
+from handlers.create_task import router as create_router
+from handlers.start import router as start_router
+from handlers.find_task import router as find_router
 
 load_dotenv()
 
@@ -75,7 +76,9 @@ async def create_tables():
 
 
 async def main():
-    dp.include_router(router)
+    dp.include_router(create_router)
+    dp.include_router(start_router)
+    dp.include_router(find_router)
     try:
         logger.info('Starting bot ...')
         # await create_tables()

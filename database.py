@@ -1,5 +1,5 @@
 import os
-from Database.models import User, Project, Admin, Category, Qualification, ProjectEmployee
+from models import User, Project, Admin, Category, Qualification, ProjectEmployee
 from typing import Optional, Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
