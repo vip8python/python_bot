@@ -1,9 +1,8 @@
 import os
-from typing import Optional
+from Database.models import User, Project, Admin, Category, Qualification, ProjectEmployee
+from typing import Optional, Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-from Database.models import Admins, User, Project, Base
 
 
 class DataBase:
@@ -17,18 +16,16 @@ class DataBase:
         self.async_engine = create_async_engine(self.connect, echo=True)
         self.Session = async_sessionmaker(bind=self.async_engine, class_=AsyncSession, expire_on_commit=False)
 
-    async def __aenter__(self) -> 'DataBase':
-        self.session = await self.Session()
+    async def __aenter__(self):
+        self.session = self.Session()
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
         await self.session.close()
 
-
-
-    async def get_admin(self, admin_id: int) -> Optional[Admins]:
+    async def get_admin(self, admin_id: int) -> Optional[Admin]:
         async with self.Session() as session:
-            result = await session.execute(select(Admins).where(Admins.telegram_id == str(admin_id)))
+            result = await session.execute(select(Admin).where(Admin.telegram_id == str(admin_id)))
         return result.scalar()
 
     # Async funkcijos dalyvių pridėjimui ir pašalinimui
@@ -51,3 +48,48 @@ class DataBase:
 
                 project.remove_participant(user)
                 session.add(project)  # pridėkite projekto atnaujinimus į sesiją
+
+    async def get_all_categories(self) -> Sequence[Category]:
+        async with self.Session() as session:
+            result = await session.scalars(select(Category))
+        return result.all()
+
+    async def get_qualifications(self):
+        print('qualification db')
+        async with self.Session() as session:
+            result = await session.scalars(select(Qualification))
+        return result.all()
+
+    async def create_task(self, title, description, start_time, end_time, hourly_rate, participants_needed, repository_url,
+                          creator_id, category_id, employees_data):
+        async with self.Session() as session:
+            async with session.begin():
+                new_task = Project(
+                    title=title,
+                    description=description,
+                    start_time=start_time,
+                    end_time=end_time,
+                    hourly_rate=hourly_rate,
+                    participants_needed=participants_needed,
+                    repository_url=repository_url,
+                    creator_id=creator_id,
+                    category_id=category_id
+                )
+                session.add(new_task)
+                await session.flush()  # To get the new_task.id
+
+                for emp_data in employees_data:
+                    new_employee = ProjectEmployee(
+                        project_id=new_task.id,
+                        employees_count=emp_data['employees_count'],
+                        qualification_id=emp_data['qualification_id']
+                    )
+                    session.add(new_employee)
+                await session.commit()
+
+    async def get_tasks_by_category(self, category_id):
+        async with self.Session() as session:
+            result = await session.execute(
+                select(Project).where(Project.category_id == category_id)
+            )
+            return result.scalars().all()

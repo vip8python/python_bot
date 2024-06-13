@@ -1,5 +1,9 @@
 from aiogram import Bot
-from aiogram.types import BotCommand, BotCommandScopeDefault
+from aiogram.types import BotCommand, BotCommandScopeDefault, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from Database.database import DataBase
+from Handlers.keyboards import add_more_employees
 
 
 async def check_admin(db, admin_id):
@@ -32,3 +36,4 @@ async def set_commands(bot: Bot):
     ]
 
     await bot.set_my_commands(commands, BotCommandScopeDefault())
+

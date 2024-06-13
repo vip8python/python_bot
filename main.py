@@ -5,13 +5,13 @@ import os
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, Command
-from aiogram.types import Message
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine
 from Core.Logging.formatters import CustomJsonFormatter
 from Core.menu import set_commands
+from Database.database import DataBase
 from Database.models import Base
+from Handlers.handlers import router
 
 load_dotenv()
 
@@ -75,9 +75,10 @@ async def create_tables():
 
 
 async def main():
+    dp.include_router(router)
     try:
         logger.info('Starting bot ...')
-        await create_tables()
+        # await create_tables()
         await set_commands(bot_)
         await dp.start_polling(bot_, skip_updates=True)
     except Exception as e:
@@ -89,4 +90,3 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
-

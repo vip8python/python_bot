@@ -1,0 +1,866 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 15.6 (Postgres.app)
+-- Dumped by pg_dump version 15.6 (Postgres.app)
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: admins; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.admins (
+    id integer NOT NULL,
+    username character varying(100) NOT NULL,
+    telegram_id character varying(100)
+);
+
+
+ALTER TABLE public.admins OWNER TO postgres;
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.admins_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.admins_id_seq OWNER TO postgres;
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.admins_id_seq OWNED BY public.admins.id;
+
+
+--
+-- Name: alembic_version; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.alembic_version (
+    version_num character varying(32) NOT NULL
+);
+
+
+ALTER TABLE public.alembic_version OWNER TO postgres;
+
+--
+-- Name: categories; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.categories (
+    id integer NOT NULL,
+    name character varying(100)
+);
+
+
+ALTER TABLE public.categories OWNER TO postgres;
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.categories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.categories_id_seq OWNER TO postgres;
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.categories_id_seq OWNED BY public.categories.id;
+
+
+--
+-- Name: contact_methods; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.contact_methods (
+    id integer NOT NULL,
+    method character varying(100)
+);
+
+
+ALTER TABLE public.contact_methods OWNER TO postgres;
+
+--
+-- Name: contact_methods_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.contact_methods_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.contact_methods_id_seq OWNER TO postgres;
+
+--
+-- Name: contact_methods_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.contact_methods_id_seq OWNED BY public.contact_methods.id;
+
+
+--
+-- Name: project_contact; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.project_contact (
+    project_id integer NOT NULL,
+    contact_method_id integer NOT NULL
+);
+
+
+ALTER TABLE public.project_contact OWNER TO postgres;
+
+--
+-- Name: project_reviews; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.project_reviews (
+    id integer NOT NULL,
+    project_id integer,
+    reviewer_id integer,
+    rating integer,
+    comment text
+);
+
+
+ALTER TABLE public.project_reviews OWNER TO postgres;
+
+--
+-- Name: project_reviews_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.project_reviews_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.project_reviews_id_seq OWNER TO postgres;
+
+--
+-- Name: project_reviews_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.project_reviews_id_seq OWNED BY public.project_reviews.id;
+
+
+--
+-- Name: project_specialization; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.project_specialization (
+    project_id integer NOT NULL,
+    specialization_id integer NOT NULL
+);
+
+
+ALTER TABLE public.project_specialization OWNER TO postgres;
+
+--
+-- Name: projects; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.projects (
+    id integer NOT NULL,
+    title character varying(100),
+    description text,
+    start_time date,
+    end_time date,
+    hourly_rate double precision,
+    participants_needed integer,
+    repository_url character varying(100),
+    creator_id integer,
+    category_id integer
+);
+
+
+ALTER TABLE public.projects OWNER TO postgres;
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.projects_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.projects_id_seq OWNER TO postgres;
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.projects_id_seq OWNED BY public.projects.id;
+
+
+--
+-- Name: specializations; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.specializations (
+    id integer NOT NULL,
+    name character varying(100)
+);
+
+
+ALTER TABLE public.specializations OWNER TO postgres;
+
+--
+-- Name: specializations_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.specializations_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.specializations_id_seq OWNER TO postgres;
+
+--
+-- Name: specializations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.specializations_id_seq OWNED BY public.specializations.id;
+
+
+--
+-- Name: user_projects; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_projects (
+    id integer NOT NULL,
+    user_id integer,
+    project_id integer
+);
+
+
+ALTER TABLE public.user_projects OWNER TO postgres;
+
+--
+-- Name: user_projects_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.user_projects_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_projects_id_seq OWNER TO postgres;
+
+--
+-- Name: user_projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.user_projects_id_seq OWNED BY public.user_projects.id;
+
+
+--
+-- Name: user_reviews; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.user_reviews (
+    id integer NOT NULL,
+    reviewer_id integer,
+    reviewed_id integer,
+    project_id integer,
+    rating integer,
+    comment text
+);
+
+
+ALTER TABLE public.user_reviews OWNER TO postgres;
+
+--
+-- Name: user_reviews_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.user_reviews_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.user_reviews_id_seq OWNER TO postgres;
+
+--
+-- Name: user_reviews_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.user_reviews_id_seq OWNED BY public.user_reviews.id;
+
+
+--
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    telegram_id character varying(100),
+    username character varying(100) NOT NULL,
+    contacts character varying(100),
+    description text,
+    registered date
+);
+
+
+ALTER TABLE public.users OWNER TO postgres;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.users_id_seq OWNER TO postgres;
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: admins id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admins ALTER COLUMN id SET DEFAULT nextval('public.admins_id_seq'::regclass);
+
+
+--
+-- Name: categories id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.categories ALTER COLUMN id SET DEFAULT nextval('public.categories_id_seq'::regclass);
+
+
+--
+-- Name: contact_methods id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.contact_methods ALTER COLUMN id SET DEFAULT nextval('public.contact_methods_id_seq'::regclass);
+
+
+--
+-- Name: project_reviews id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_reviews ALTER COLUMN id SET DEFAULT nextval('public.project_reviews_id_seq'::regclass);
+
+
+--
+-- Name: projects id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects ALTER COLUMN id SET DEFAULT nextval('public.projects_id_seq'::regclass);
+
+
+--
+-- Name: specializations id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.specializations ALTER COLUMN id SET DEFAULT nextval('public.specializations_id_seq'::regclass);
+
+
+--
+-- Name: user_projects id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_projects ALTER COLUMN id SET DEFAULT nextval('public.user_projects_id_seq'::regclass);
+
+
+--
+-- Name: user_reviews id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_reviews ALTER COLUMN id SET DEFAULT nextval('public.user_reviews_id_seq'::regclass);
+
+
+--
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Data for Name: admins; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.admins (id, username, telegram_id) FROM stdin;
+1	user1	1753754
+2	user2	275368
+3	user3	373873
+4	user4	4387373
+5	user5	5738347
+\.
+
+
+--
+-- Data for Name: alembic_version; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.alembic_version (version_num) FROM stdin;
+b257cdca44d2
+\.
+
+
+--
+-- Data for Name: categories; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.categories (id, name) FROM stdin;
+1	Category 1
+2	Category 2
+3	Category 3
+4	Category 4
+5	Category 5
+\.
+
+
+--
+-- Data for Name: contact_methods; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.contact_methods (id, method) FROM stdin;
+1	Method 1
+2	Method 2
+3	Method 3
+4	Method 4
+5	Method 5
+\.
+
+
+--
+-- Data for Name: project_contact; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.project_contact (project_id, contact_method_id) FROM stdin;
+1	1
+2	3
+3	3
+4	4
+5	4
+\.
+
+
+--
+-- Data for Name: project_reviews; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.project_reviews (id, project_id, reviewer_id, rating, comment) FROM stdin;
+31	1	2	5	Great project!
+32	2	3	4	Good project!
+33	3	4	3	Average project!
+34	4	5	2	Poor project!
+35	5	1	1	Terrible project!
+\.
+
+
+--
+-- Data for Name: project_specialization; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.project_specialization (project_id, specialization_id) FROM stdin;
+1	1
+2	2
+3	5
+4	2
+5	4
+\.
+
+
+--
+-- Data for Name: projects; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.projects (id, title, description, start_time, end_time, hourly_rate, participants_needed, repository_url, creator_id, category_id) FROM stdin;
+1	Project 1	Description 1	2024-06-01	2024-06-10	10.5	3	https://repository1.com	1	1
+2	Project 2	Description 2	2024-06-02	2024-06-11	11.5	4	https://repository2.com	2	2
+3	Project 3	Description 3	2024-06-03	2024-06-12	12.5	5	https://repository3.com	3	3
+4	Project 4	Description 4	2024-06-04	2024-06-13	13.5	6	https://repository4.com	4	4
+5	Project 5	Description 5	2024-06-05	2024-06-14	14.5	7	https://repository5.com	5	5
+\.
+
+
+--
+-- Data for Name: specializations; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.specializations (id, name) FROM stdin;
+1	Specialization 1
+2	Specialization 2
+3	Specialization 3
+4	Specialization 4
+5	Specialization 5
+\.
+
+
+--
+-- Data for Name: user_projects; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.user_projects (id, user_id, project_id) FROM stdin;
+26	1	1
+27	2	2
+28	3	3
+29	4	4
+30	5	5
+\.
+
+
+--
+-- Data for Name: user_reviews; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.user_reviews (id, reviewer_id, reviewed_id, project_id, rating, comment) FROM stdin;
+16	1	2	1	5	Great user!
+17	2	3	2	4	Good user!
+18	3	4	3	3	Average user!
+19	4	5	4	2	Poor user!
+20	5	1	5	1	Terrible user!
+\.
+
+
+--
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.users (id, telegram_id, username, contacts, description, registered) FROM stdin;
+1	telegram_id1	user1	contact1	Description 1	2024-06-01
+2	telegram_id2	user2	contact2	Description 2	2024-06-02
+3	telegram_id3	user3	contact3	Description 3	2024-06-03
+4	telegram_id4	user4	contact4	Description 4	2024-06-04
+5	telegram_id5	user5	contact5	Description 5	2024-06-05
+\.
+
+
+--
+-- Name: admins_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.admins_id_seq', 5, true);
+
+
+--
+-- Name: categories_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.categories_id_seq', 10, true);
+
+
+--
+-- Name: contact_methods_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.contact_methods_id_seq', 10, true);
+
+
+--
+-- Name: project_reviews_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.project_reviews_id_seq', 35, true);
+
+
+--
+-- Name: projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.projects_id_seq', 20, true);
+
+
+--
+-- Name: specializations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.specializations_id_seq', 10, true);
+
+
+--
+-- Name: user_projects_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.user_projects_id_seq', 30, true);
+
+
+--
+-- Name: user_reviews_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.user_reviews_id_seq', 20, true);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 5, true);
+
+
+--
+-- Name: admins admins_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.admins
+    ADD CONSTRAINT admins_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: alembic_version alembic_version_pkc; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.alembic_version
+    ADD CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num);
+
+
+--
+-- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.categories
+    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: contact_methods contact_methods_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.contact_methods
+    ADD CONSTRAINT contact_methods_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_contact project_contact_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_contact
+    ADD CONSTRAINT project_contact_pkey PRIMARY KEY (project_id, contact_method_id);
+
+
+--
+-- Name: project_reviews project_reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_reviews
+    ADD CONSTRAINT project_reviews_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_specialization project_specialization_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_specialization
+    ADD CONSTRAINT project_specialization_pkey PRIMARY KEY (project_id, specialization_id);
+
+
+--
+-- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: specializations specializations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.specializations
+    ADD CONSTRAINT specializations_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_projects user_projects_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_projects
+    ADD CONSTRAINT user_projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_reviews user_reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_reviews
+    ADD CONSTRAINT user_reviews_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: project_contact project_contact_contact_method_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_contact
+    ADD CONSTRAINT project_contact_contact_method_id_fkey FOREIGN KEY (contact_method_id) REFERENCES public.contact_methods(id);
+
+
+--
+-- Name: project_contact project_contact_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_contact
+    ADD CONSTRAINT project_contact_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: project_reviews project_reviews_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_reviews
+    ADD CONSTRAINT project_reviews_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: project_reviews project_reviews_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_reviews
+    ADD CONSTRAINT project_reviews_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES public.users(id);
+
+
+--
+-- Name: project_specialization project_specialization_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_specialization
+    ADD CONSTRAINT project_specialization_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: project_specialization project_specialization_specialization_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.project_specialization
+    ADD CONSTRAINT project_specialization_specialization_id_fkey FOREIGN KEY (specialization_id) REFERENCES public.specializations(id);
+
+
+--
+-- Name: projects projects_category_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.categories(id);
+
+
+--
+-- Name: projects projects_creator_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.projects
+    ADD CONSTRAINT projects_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES public.users(id);
+
+
+--
+-- Name: user_projects user_projects_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_projects
+    ADD CONSTRAINT user_projects_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: user_projects user_projects_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_projects
+    ADD CONSTRAINT user_projects_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id);
+
+
+--
+-- Name: user_reviews user_reviews_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_reviews
+    ADD CONSTRAINT user_reviews_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id);
+
+
+--
+-- Name: user_reviews user_reviews_reviewed_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_reviews
+    ADD CONSTRAINT user_reviews_reviewed_id_fkey FOREIGN KEY (reviewed_id) REFERENCES public.users(id);
+
+
+--
+-- Name: user_reviews user_reviews_reviewer_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_reviews
+    ADD CONSTRAINT user_reviews_reviewer_id_fkey FOREIGN KEY (reviewer_id) REFERENCES public.users(id);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
