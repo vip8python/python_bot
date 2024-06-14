@@ -6,7 +6,7 @@ class CreateTask(StatesGroup):
     name = State()
     qualification = State()
     number_of_employees = State()
+    salary = State()
     start_date = State()
     end_date = State()
-    salary = State()
     platform_address = State()

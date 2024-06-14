@@ -150,3 +150,11 @@ class Admin(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), nullable=False)
     telegram_id: Mapped[str] = mapped_column(String(100))
+
+
+class Salary(Base):
+    __tablename__ = 'salaries'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+

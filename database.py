@@ -1,5 +1,5 @@
 import os
-from models import User, Project, Admin, Category, Qualification, ProjectEmployee
+from models import User, Project, Admin, Category, Qualification, ProjectEmployee, Salary
 from typing import Optional, Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -60,7 +60,8 @@ class DataBase:
             result = await session.scalars(select(Qualification))
         return result.all()
 
-    async def create_task(self, title, description, start_time, end_time, hourly_rate, participants_needed, repository_url,
+    async def create_task(self, title, description, start_time, end_time, hourly_rate, participants_needed,
+                          repository_url,
                           creator_id, category_id, employees_data):
         async with self.Session() as session:
             async with session.begin():
@@ -93,3 +94,8 @@ class DataBase:
                 select(Project).where(Project.category_id == category_id)
             )
             return result.scalars().all()
+
+    async def get_salary_options(self):
+        async with self.Session() as session:
+            result = await session.scalars(select(Salary))
+        return result.all()
