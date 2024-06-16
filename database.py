@@ -1,8 +1,12 @@
 import os
-from models import User, Project, Admin, Category, Qualification, ProjectEmployee, Salary
+from datetime import datetime
+from dotenv import load_dotenv
+from models import Project, Admin, Category, Qualification, ProjectEmployee, Salary, User
 from typing import Optional, Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+load_dotenv()
 
 
 class DataBase:
@@ -28,34 +32,12 @@ class DataBase:
             result = await session.execute(select(Admin).where(Admin.telegram_id == str(admin_id)))
         return result.scalar()
 
-    # Async funkcijos dalyvių pridėjimui ir pašalinimui
-    async def add_participant_to_project(self, project_id: int, user: User, current_user_id: int):
-        async with self.Session() as session:
-            async with session.begin():
-                project = await session.get(Project, project_id)
-                if project.creator_id != current_user_id:
-                    raise PermissionError("Only the project creator can add participants.")
-
-                project.add_participant(user)
-                session.add(project)  # pridėkite projekto atnaujinimus į sesiją
-
-    async def remove_participant_from_project(self, project_id: int, user: User, current_user_id: int):
-        async with self.Session() as session:
-            async with session.begin():
-                project = await session.get(Project, project_id)
-                if project.creator_id != current_user_id:
-                    raise PermissionError("Only the project creator can remove participants.")
-
-                project.remove_participant(user)
-                session.add(project)  # pridėkite projekto atnaujinimus į sesiją
-
     async def get_all_categories(self) -> Sequence[Category]:
         async with self.Session() as session:
             result = await session.scalars(select(Category))
         return result.all()
 
     async def get_qualifications(self):
-        print('qualification db')
         async with self.Session() as session:
             result = await session.scalars(select(Qualification))
         return result.all()
@@ -99,3 +81,60 @@ class DataBase:
         async with self.Session() as session:
             result = await session.scalars(select(Salary))
         return result.all()
+
+    async def get_async_session(self):
+        async with self.Session() as session:
+            yield session
+
+    async def get_user_by_telegram_id(self, telegram_id: str) -> User:
+        async with self.Session() as session:
+            result = await session.execute(select(User).where(User.telegram_id == telegram_id))
+            return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_or_create_qualification(session: AsyncSession, qualification_name: str) -> int:
+        result = await session.execute(
+            select(Qualification).filter_by(name=qualification_name)
+        )
+        qualification = result.scalar_one_or_none()
+        if not qualification:
+            qualification = Qualification(name=qualification_name)
+            session.add(qualification)
+            await session.flush()
+        return qualification.id
+
+    async def save_task_to_db(self, session: AsyncSession, title: str, description: str, start_date: str,
+                              end_date: str, employees_list: list, full_salary: int, repository_url: str,
+                              telegram_id: str, category_id: int) -> Project:
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+
+        user = await self.get_user_by_telegram_id(telegram_id)
+        if not user:
+            raise ValueError(f"User with telegram_id {telegram_id} not found.")
+        creator_id = user.id
+
+        new_project = Project(
+            title=title,
+            description=description,
+            start_time=start_date,
+            end_time=end_date,
+            salary=full_salary,
+            participants_needed=sum([e['employees_count'] for e in employees_list]),
+            repository_url=repository_url,
+            creator_id=creator_id,
+            category_id=category_id
+        )
+        session.add(new_project)
+        await session.flush()
+
+        for employee in employees_list:
+            qualification_id = await self.get_or_create_qualification(session, employee['qualification']['name'])
+            new_employee = ProjectEmployee(
+                project_id=new_project.id,
+                employees_count=employee['employees_count'],
+                qualification_id=qualification_id
+            )
+            session.add(new_employee)
+        await session.commit()
+        return new_project

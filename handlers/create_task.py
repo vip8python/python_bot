@@ -2,33 +2,43 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
+from database import DataBase
 from keyboards.create_task_kb import all_categories_kb, all_qualification_kb, add_more_employees_kb, salary_options_kb
 from states.create_task_state import CreateTask
 from utils.validators import is_integer, validate_date, validate_end_date
 
 router = Router()
 storage = MemoryStorage()
+db = DataBase()
 
 
-@router.message(F.text == 'create task')
+@router.message(F.text.in_(['create task', '/create_task']))
 async def categories(message: Message, state: FSMContext):
-    await message.answer('Frameworks', reply_markup=await all_categories_kb())
-    await state.set_state(CreateTask.framework)
+    await message.answer('Select frameworks', reply_markup=await all_categories_kb())
+    await state.set_state(CreateTask.category)
 
 
-@router.callback_query(CreateTask.framework)
+@router.callback_query(CreateTask.category)
 async def select_category(call: CallbackQuery, state: FSMContext):
     category_id = int(call.data.split('_')[1])
     category_name = call.data.split('_')[-1]
     await call.message.answer(f'you selected {category_name}. Enter the task name.')
     await state.update_data(category_id=category_id)
-    await state.set_state(CreateTask.name)
+    await state.set_state(CreateTask.title)
 
 
-@router.message(CreateTask.name)
-async def enter_name(message: Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await message.answer('Select what qualification employees are needed.', reply_markup=await all_qualification_kb())
+@router.message(CreateTask.title)
+async def enter_title(message: Message, state: FSMContext):
+    await state.update_data(title=message.text)
+    await message.answer('Write a short description.')
+    await state.set_state(CreateTask.description)
+
+
+@router.message(CreateTask.description)
+async def add_description(message: Message, state: FSMContext):
+    await state.update_data(description=message.text)
+    await message.answer('Select what qualification employees are needed.',
+                         reply_markup=await all_qualification_kb())
     await state.set_state(CreateTask.qualification)
 
 
@@ -61,9 +71,9 @@ async def enter_number_of_employees(message: Message, state: FSMContext) -> None
 
 @router.callback_query(F.data.startswith('category_'))
 async def select_salary_option(call: CallbackQuery, state: FSMContext):
-    price = call.data.split('_')[-1]
-    await state.update_data(price=price)
-    await call.message.answer(f'Salary option {price} selected. Please enter the salary amount.')
+    salary_option = call.data.split('_')[-1]
+    await state.update_data(salary_option=salary_option)
+    await call.message.answer(f'Salary option {salary_option} selected. Please enter the salary amount.')
     await state.set_state(CreateTask.salary)
 
 
@@ -76,14 +86,17 @@ async def add_salary(message: Message, state: FSMContext):
     data = await state.get_data()
     employees_list = data.get('employees_list', [])
     employees_list[-1]['salary'] = salary
+    full_salary = sum([emp['salary'] for emp in employees_list])
     await state.update_data(employees_list=employees_list)
-    await message.answer('Salary assigned. Would you like to add more employees or proceed?',
-                         reply_markup=await add_more_employees_kb())
+    await state.update_data(full_salary=full_salary)
+    await message.answer(
+        f'Salary assigned. Full salary: {full_salary}. Would you like to add more employees or proceed?',
+        reply_markup=await add_more_employees_kb())
 
 
 @router.callback_query(F.data == 'more_employees')
 async def next_step_selected(call: CallbackQuery, state: FSMContext):
-    await call.message.answer('gkhm', reply_markup=await all_qualification_kb())
+    await call.message.answer('', reply_markup=await all_qualification_kb())
     await state.set_state(CreateTask.qualification)
 
 
@@ -111,30 +124,44 @@ async def enter_end_date(message: Message, state: FSMContext):
     if not await validate_end_date(start_date, message.text):
         await message.answer("End date should be later than start date. Please enter a valid date.")
     await state.update_data(end_date=message.text)
-    await message.answer('Please enter platform address')
-    await state.set_state(CreateTask.platform_address)
+    await message.answer('Please enter repository address')
+    await state.set_state(CreateTask.repository_url)
 
 
-@router.message(CreateTask.platform_address)
-async def enter_platform_address(message: Message, state: FSMContext):
-    await state.update_data(platform_address=message.text)
+@router.message(CreateTask.repository_url)
+async def enter_repository_address(message: Message, state: FSMContext):
+    print('enter_address')
+    telegram_id = str(message.from_user.id)
+    print('creator_id', telegram_id, type(telegram_id))
+    await state.update_data(repository_url=message.text)
     data = await state.get_data()
-    name = data.get('name')
+    title = data.get('title')
+    category = data.get('category')
+    description = data.get('description')
     employees_list = data.get('employees_list', [])
-    salary = data.get('price')
+    salary_option = data.get('salary_option')
+    full_salary = data.get('full_salary')
     start_date = data.get('start_date')
     end_date = data.get('end_date')
-    platform_address = data.get('platform_address')
+    repository_url = data.get('repository_url')
+    category_id = data.get('category_id')
 
     employees_info = "\n".join(
-        [f"{e['employees_count']} employees with qualification: {e['qualification']['name']}, Salary: {e['salary']}" for e in employees_list])
+        [f"{e['employees_count']} employees with qualification: {e['qualification']['name']}, Salary: {e['salary']}" for
+         e in employees_list])
 
     response = (f"Task created with the following details:\n"
-                f"Task Name: {name}\n"
-                f"Employees:\n{employees_info}{salary}\n"
+                f"Task Name: {title}\n"
+                f'Category: {category}\n'
+                f'Description: {description}\n'
+                f"Employees:\n{employees_info} - {salary_option}\n"
+                f'Full salary: {full_salary}\n'
                 f"Start Date: {start_date}\n"
                 f"End Date: {end_date}\n"
-                f"Platform Address: {platform_address}")
+                f"Repository Address: {repository_url}")
 
     await message.answer(response)
+    async for session in db.get_async_session():
+        await db.save_task_to_db(session, title, description, start_date, end_date, employees_list, full_salary,
+                                 repository_url, telegram_id, category_id)
     await state.clear()

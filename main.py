@@ -76,9 +76,11 @@ async def create_tables():
 
 
 async def main():
-    dp.include_router(create_router)
-    dp.include_router(start_router)
-    dp.include_router(find_router)
+    dp.include_routers(
+        create_router,
+        start_router,
+        find_router
+    )
     try:
         logger.info('Starting bot ...')
         # await create_tables()

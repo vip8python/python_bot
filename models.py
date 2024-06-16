@@ -71,7 +71,7 @@ class Project(Base):
     description: Mapped[str] = mapped_column(Text)
     start_time: Mapped[datetime.date] = mapped_column(Date)
     end_time: Mapped[datetime.date] = mapped_column(Date)
-    hourly_rate: Mapped[float] = mapped_column(Float)
+    salary: Mapped[int] = mapped_column(Integer)
     participants_needed: Mapped[int] = mapped_column(Integer)
     repository_url: Mapped[str] = mapped_column(String(100))
     creator_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
@@ -157,4 +157,3 @@ class Salary(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-

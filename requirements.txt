@@ -22,3 +22,4 @@ setuptools==70.0.0
 SQLAlchemy==2.0.30
 typing_extensions==4.12.2
 yarl==1.9.4
+
