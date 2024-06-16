@@ -13,6 +13,7 @@ from models import Base
 from handlers.create_task import router as create_router
 from handlers.start import router as start_router
 from handlers.find_task import router as find_router
+from handlers.registration import router as registration_router
 
 load_dotenv()
 
@@ -79,7 +80,8 @@ async def main():
     dp.include_routers(
         create_router,
         start_router,
-        find_router
+        find_router,
+        registration_router
     )
     try:
         logger.info('Starting bot ...')

@@ -138,3 +138,16 @@ class DataBase:
             session.add(new_employee)
         await session.commit()
         return new_project
+
+    @staticmethod
+    async def create_user(session: AsyncSession, username: str, contacts: str, description: str,
+                          telegram_id: str) -> User:
+        new_user = User(
+            username=username,
+            contacts=contacts,
+            description=description,
+            telegram_id=telegram_id
+        )
+        session.add(new_user)
+        await session.commit()
+        return new_user
