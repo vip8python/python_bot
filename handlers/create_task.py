@@ -2,8 +2,11 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
+from sqlalchemy import select
+
 from database import DataBase
 from keyboards.create_task_kb import all_categories_kb, all_qualification_kb, add_more_employees_kb, salary_options_kb
+from models import User
 from states.create_task_state import CreateTask
 from utils.validators import is_integer, validate_date, validate_end_date
 
@@ -14,8 +17,17 @@ db = DataBase()
 
 @router.message(F.text.in_(['create task', '/create_task']))
 async def categories(message: Message, state: FSMContext):
-    await message.answer('Select frameworks', reply_markup=await all_categories_kb())
-    await state.set_state(CreateTask.category)
+    telegram_id = str(message.from_user.id)
+    async for session in DataBase().get_async_session():
+        user = await session.execute(
+            select(User).where(User.telegram_id == telegram_id)
+        )
+        user = user.scalar_one_or_none()
+        if user is None:
+            await message.answer("You need to be registered to create tasks. Please use /register to register.")
+            return
+        await message.answer('Select frameworks', reply_markup=await all_categories_kb())
+        await state.set_state(CreateTask.category)
 
 
 @router.callback_query(CreateTask.category)

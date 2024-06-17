@@ -10,7 +10,7 @@ storage = MemoryStorage()
 db = DataBase()
 
 
-@router.message(F.text == '/registration')
+@router.message(F.text == '/register')
 async def start_registration(message: Message, state: FSMContext):
     await message.answer('Please enter your username:')
     await state.set_state(RegisterUser.username)
@@ -40,7 +40,10 @@ async def enter_description(message: Message, state: FSMContext):
     telegram_id = str(message.from_user.id)
 
     async for session in db.get_async_session():
-        await db.create_user(session, username, contacts, description, telegram_id)
-
-    await message.answer('You have been registered successfully!')
-    await state.clear()
+        try:
+            new_user = await db.create_user(session, username, contacts, description, telegram_id)
+            await message.reply(f'Created new user: {new_user.username}')
+        except Exception as e:
+            await message.answer(f'Error: {e}')
+        finally:
+            await state.clear()

@@ -86,10 +86,10 @@ class DataBase:
         async with self.Session() as session:
             yield session
 
-    async def get_user_by_telegram_id(self, telegram_id: str) -> User:
+    async def get_user_by_telegram_id(self, telegram_id: str) -> Optional[User]:
         async with self.Session() as session:
             result = await session.execute(select(User).where(User.telegram_id == telegram_id))
-            return result.scalar_one_or_none()
+            return result.one_or_none()
 
     @staticmethod
     async def get_or_create_qualification(session: AsyncSession, qualification_name: str) -> int:
@@ -139,15 +139,22 @@ class DataBase:
         await session.commit()
         return new_project
 
-    @staticmethod
-    async def create_user(session: AsyncSession, username: str, contacts: str, description: str,
+    async def create_user(self, session: AsyncSession, username: str, contacts: str, description: str,
                           telegram_id: str) -> User:
-        new_user = User(
-            username=username,
-            contacts=contacts,
-            description=description,
-            telegram_id=telegram_id
-        )
-        session.add(new_user)
-        await session.commit()
-        return new_user
+        try:
+            existing_user = await self.get_user_by_telegram_id(telegram_id)
+            if existing_user:
+                raise Exception(f"User with telegram_id already exists.")
+
+            new_user = User(
+                username=username,
+                contacts=contacts,
+                description=description,
+                telegram_id=telegram_id
+            )
+            session.add(new_user)
+            await session.commit()
+            return new_user
+        except Exception as e:
+            print(f'Error in create_user: {e}')
+            raise

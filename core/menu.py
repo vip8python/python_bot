@@ -2,11 +2,6 @@ from aiogram import Bot
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 
-async def check_admin(db, admin_id):
-    admin = await db.get_admin(admin_id)
-    return bool(admin)
-
-
 async def set_commands(bot: Bot):
     commands = [
         BotCommand(
@@ -14,7 +9,7 @@ async def set_commands(bot: Bot):
             description='Start bot'
         ),
         BotCommand(
-            command='registration',
+            command='register',
             description='Registration'
         ),
         BotCommand(

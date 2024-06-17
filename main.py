@@ -9,11 +9,12 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine
 from core.logging.formatters import CustomJsonFormatter
 from core.menu import set_commands
+from middleware.registration_middleware import RegistrationMiddleware
 from models import Base
 from handlers.create_task import router as create_router
 from handlers.start import router as start_router
 from handlers.find_task import router as find_router
-from handlers.registration import router as registration_router
+from handlers.registration import router as register_router
 
 load_dotenv()
 
@@ -77,12 +78,12 @@ async def create_tables():
 
 
 async def main():
+    # dp.message.middleware.register(RegistrationMiddleware())
     dp.include_routers(
         create_router,
         start_router,
         find_router,
-        registration_router
-    )
+        register_router)
     try:
         logger.info('Starting bot ...')
         # await create_tables()
