@@ -1,4 +1,5 @@
 import os
+import logging
 from datetime import datetime
 from dotenv import load_dotenv
 from models import Project, Admin, Category, Qualification, ProjectEmployee, Salary, User
@@ -7,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 class DataBase:
@@ -89,7 +92,7 @@ class DataBase:
     async def get_user_by_telegram_id(self, telegram_id: str) -> Optional[User]:
         async with self.Session() as session:
             result = await session.execute(select(User).where(User.telegram_id == telegram_id))
-            return result.one_or_none()
+            return result.scalar_one_or_none()
 
     @staticmethod
     async def get_or_create_qualification(session: AsyncSession, qualification_name: str) -> int:
@@ -156,5 +159,5 @@ class DataBase:
             await session.commit()
             return new_user
         except Exception as e:
-            print(f'Error in create_user: {e}')
+            logger.error(f'Error in create_user: {e}', exc_info=True)
             raise

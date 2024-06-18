@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine
 from core.logging.formatters import CustomJsonFormatter
 from core.menu import set_commands
-from middleware.registration_middleware import RegistrationMiddleware
+from middleware.registration_middleware import RegistrationMiddleware, get_registration_middleware
 from models import Base
 from handlers.create_task import router as create_router
 from handlers.start import router as start_router
@@ -78,12 +78,18 @@ async def create_tables():
 
 
 async def main():
-    # dp.message.middleware.register(RegistrationMiddleware())
-    dp.include_routers(
-        create_router,
-        start_router,
-        find_router,
-        register_router)
+    dp.include_router(start_router)
+    dp.include_router(register_router)
+
+    allowed_commands_create = ["/create_task"]
+    allowed_commands_find = ["/find_task"]
+
+    create_router.message.middleware.register(get_registration_middleware(allowed_commands_create))
+    find_router.message.middleware.register(get_registration_middleware(allowed_commands_find))
+
+    dp.include_router(create_router)
+    dp.include_router(find_router)
+
     try:
         logger.info('Starting bot ...')
         # await create_tables()
