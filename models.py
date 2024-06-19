@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import String, Text, Date, Integer, ForeignKey, Float, Table, Column
+from sqlalchemy import String, Text, Date, Integer, ForeignKey, Table, Column
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
 
@@ -87,6 +87,13 @@ class Project(Base):
     qualifications = relationship("ProjectQualificationEmployee", back_populates="project")
 
 
+class SalaryType(Base):
+    __tablename__ = 'salary_types'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+
+
 class ProjectQualificationEmployee(Base):
     __tablename__ = 'project_qualification_employee'
 
@@ -100,7 +107,7 @@ class ProjectQualificationEmployee(Base):
 
     project = relationship("Project", back_populates="qualifications")
     qualification = relationship("Qualification")
-    salary_type = relationship("SalaryType", back_populates='types')
+    salary_type = relationship("SalaryType", foreign_keys=[salary_types_id])
 
 
 class UserProject(Base):
@@ -147,15 +154,6 @@ class Qualification(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100))
-
-
-class SalaryType(Base):
-    __tablename__ = 'salary_types'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-
-    types = relationship("ProjectQualificationEmployee", back_populates='salary_type')
 
 
 class Admin(Base):

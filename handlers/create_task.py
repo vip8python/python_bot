@@ -43,7 +43,7 @@ async def select_category(call: CallbackQuery, state: FSMContext):
 @router.message(CreateTask.title)
 async def enter_title(message: Message, state: FSMContext):
     await state.update_data(title=message.text)
-    await message.answer('Write a short description.')
+    await message.answer('Write a short description and contacts.')
     await state.set_state(CreateTask.description)
 
 
