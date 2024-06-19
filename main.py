@@ -65,12 +65,12 @@ dp = Dispatcher()
 
 
 async def create_tables():
-    db_host = os.getenv('DB_HOST')
+    db_host = 'https://python-bot-d45e.onrender.com'
     db_port = os.getenv('DB_PORT')
     db_user = os.getenv('DB_USER')
     db_password = os.getenv('DB_PASSWORD')
     db_name = os.getenv('DB_NAME')
-    connect = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    connect = f"postgresql+asyncpg:python_bot_ivw1_user:77GKm5jEWPwrFZwOVHuaH4VRwb8k1nRP@dpg-cppes0ij1k6c73ehrrp0-a.oregon-postgres.render.com/python_bot_ivw1"
     engine = create_async_engine(connect, echo=True)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
