@@ -1,7 +1,6 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
-
 from keyboards.start_kb import start_kb
 
 router = Router()

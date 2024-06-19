@@ -2,7 +2,7 @@ import os
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
-from models import Project, Admin, Category, Qualification, ProjectEmployee, Salary, User
+from models import Project, Admin, Category, Qualification, ProjectQualificationEmployee, User, SalaryType
 from typing import Optional, Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -62,10 +62,10 @@ class DataBase:
                     category_id=category_id
                 )
                 session.add(new_task)
-                await session.flush()  # To get the new_task.id
+                await session.flush()
 
                 for emp_data in employees_data:
-                    new_employee = ProjectEmployee(
+                    new_employee = ProjectQualificationEmployee(
                         project_id=new_task.id,
                         employees_count=emp_data['employees_count'],
                         qualification_id=emp_data['qualification_id']
@@ -82,14 +82,14 @@ class DataBase:
 
     async def get_salary_options(self):
         async with self.Session() as session:
-            result = await session.scalars(select(Salary))
+            result = await session.scalars(select(SalaryType))
         return result.all()
 
     async def get_async_session(self):
         async with self.Session() as session:
             yield session
 
-    async def get_user_by_telegram_id(self, telegram_id: str) -> Optional[User]:
+    async def is_user_registered(self, telegram_id: str) -> Optional[User]:
         async with self.Session() as session:
             result = await session.execute(select(User).where(User.telegram_id == telegram_id))
             return result.scalar_one_or_none()
@@ -107,12 +107,12 @@ class DataBase:
         return qualification.id
 
     async def save_task_to_db(self, session: AsyncSession, title: str, description: str, start_date: str,
-                              end_date: str, employees_list: list, full_salary: int, repository_url: str,
-                              telegram_id: str, category_id: int) -> Project:
+                              end_date: str, employees_list: list, full_price: int, repository_url: str,
+                              telegram_id: str, category_id: int, salary_type_id: int) -> Project:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
-        user = await self.get_user_by_telegram_id(telegram_id)
+        user = await self.is_user_registered(telegram_id)
         if not user:
             raise ValueError(f"User with telegram_id {telegram_id} not found.")
         creator_id = user.id
@@ -122,7 +122,7 @@ class DataBase:
             description=description,
             start_time=start_date,
             end_time=end_date,
-            salary=full_salary,
+            salary=full_price,
             participants_needed=sum([e['employees_count'] for e in employees_list]),
             repository_url=repository_url,
             creator_id=creator_id,
@@ -130,13 +130,15 @@ class DataBase:
         )
         session.add(new_project)
         await session.flush()
-
         for employee in employees_list:
             qualification_id = await self.get_or_create_qualification(session, employee['qualification']['name'])
-            new_employee = ProjectEmployee(
+            new_employee = ProjectQualificationEmployee(
                 project_id=new_project.id,
                 employees_count=employee['employees_count'],
-                qualification_id=qualification_id
+                qualification_id=qualification_id,
+                salary_types_id=salary_type_id,
+                amount=employee['salary'],
+                currency='EUR'
             )
             session.add(new_employee)
         await session.commit()
@@ -145,7 +147,7 @@ class DataBase:
     async def create_user(self, session: AsyncSession, username: str, contacts: str, description: str,
                           telegram_id: str) -> User:
         try:
-            existing_user = await self.get_user_by_telegram_id(telegram_id)
+            existing_user = await self.is_user_registered(telegram_id)
             if existing_user:
                 raise Exception(f"User with telegram_id already exists.")
 

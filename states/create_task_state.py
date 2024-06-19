@@ -8,6 +8,7 @@ class CreateTask(StatesGroup):
     qualification = State()
     number_of_employees = State()
     salary = State()
+    project_price = State()
     start_date = State()
     end_date = State()
     repository_url = State()

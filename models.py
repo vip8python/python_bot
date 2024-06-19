@@ -84,18 +84,23 @@ class Project(Base):
     contact_methods = relationship("ContactMethod", secondary=project_contact_association, back_populates="projects")
     reviews = relationship("ProjectReview", back_populates="project")
     participants = relationship("UserProject", back_populates="project", cascade="all, delete-orphan")
-    employees = relationship("ProjectEmployee", back_populates="project")
+    qualifications = relationship("ProjectQualificationEmployee", back_populates="project")
 
 
-class ProjectEmployee(Base):
-    __tablename__ = 'project_employees'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    project_id = Column(Integer, ForeignKey('projects.id'))
-    employees_count = Column(Integer, nullable=False)
-    qualification_id = Column(Integer, ForeignKey('qualifications.id'))
+class ProjectQualificationEmployee(Base):
+    __tablename__ = 'project_qualification_employee'
 
-    project = relationship("Project", back_populates="employees")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    project_id: Mapped[int] = mapped_column(Integer, ForeignKey('projects.id'))
+    qualification_id: Mapped[int] = mapped_column(Integer, ForeignKey('qualifications.id'))
+    employees_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    salary_types_id: Mapped[int] = mapped_column(Integer, ForeignKey('salary_types.id'))
+    amount: Mapped[int] = mapped_column(Integer, nullable=False, default=0.0)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default='EUR')
+
+    project = relationship("Project", back_populates="qualifications")
     qualification = relationship("Qualification")
+    salary_type = relationship("SalaryType", back_populates='types')
 
 
 class UserProject(Base):
@@ -144,16 +149,18 @@ class Qualification(Base):
     name: Mapped[str] = mapped_column(String(100))
 
 
+class SalaryType(Base):
+    __tablename__ = 'salary_types'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    types = relationship("ProjectQualificationEmployee", back_populates='salary_type')
+
+
 class Admin(Base):
     __tablename__ = 'admins'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(100), nullable=False)
     telegram_id: Mapped[str] = mapped_column(String(100))
-
-
-class Salary(Base):
-    __tablename__ = 'salaries'
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
