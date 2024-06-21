@@ -92,7 +92,7 @@ async def main():
 
     try:
         logger.info('Starting bot ...')
-        await create_tables()
+        # await create_tables()
         await set_commands(bot_)
         await dp.start_polling(bot_, skip_updates=True)
     except Exception as e:

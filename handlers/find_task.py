@@ -35,9 +35,9 @@ async def find_result(call: CallbackQuery):
     if projects:
         projects_list = "\n".join(
             [f"Project: {project.title}\n"
-             f"Description: {project.description}\n "
-             f"Price: {project.salary}\n "
-             f"Data: {project.start_time} to {project.end_time}\n"
+             f"Description: {project.description}\n"
+             f"Price: {project.salary}eur.\n"
+             f"Data: from {project.start_time} to {project.end_time}\n"
              f"Workers needed: {project.participants_needed}\n"
              f"Repository: {project.repository_url}\n"
              f"Employees:\n" + "".join(

@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import String, Text, Date, Integer, ForeignKey, Table, Column
+from sqlalchemy import String, Text, Date, Integer, ForeignKey, Table, Column, Float, JSON, text, DateTime
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
 
@@ -29,11 +29,18 @@ class User(Base):
     contacts: Mapped[str] = mapped_column(String(100))
     description: Mapped[str] = mapped_column(Text)
     telegram_id: Mapped[str] = mapped_column(String(100))
-    registered: Mapped[datetime.date] = mapped_column(Date, default=datetime.date.today)
+    registered: Mapped[datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    experience: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
+    skills: Mapped[JSON] = mapped_column(JSON, nullable=True, default=list)
+    rating: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
+    country: Mapped[str] = mapped_column(String(100), nullable=True, default='World')
+    languages: Mapped[JSON] = mapped_column(JSON, nullable=True, default=list)
 
-    projects = relationship("Project", back_populates="creator")
-    reviews_given = relationship("UserReview", back_populates="reviewer", foreign_keys="[UserReview.reviewer_id]")
-    reviews_received = relationship("UserReview", back_populates="reviewed", foreign_keys="[UserReview.reviewed_id]")
+    projects = relationship('Project', back_populates='creator')
+    reviews_given = relationship('UserReview', back_populates='reviewer',
+                                 foreign_keys='[UserReview.reviewer_id]')
+    reviews_received = relationship('UserReview', back_populates='reviewed',
+                                    foreign_keys='[UserReview.reviewed_id]')
 
 
 class Category(Base):
@@ -42,7 +49,7 @@ class Category(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100))
 
-    projects = relationship("Project", back_populates="category")
+    projects = relationship('Project', back_populates='category')
 
 
 class Specialization(Base):
@@ -51,7 +58,8 @@ class Specialization(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100))
 
-    projects = relationship("Project", secondary=project_specialization_association, back_populates="specializations")
+    projects = relationship('Project', secondary=project_specialization_association,
+                            back_populates='specializations')
 
 
 class ContactMethod(Base):
@@ -60,7 +68,8 @@ class ContactMethod(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     method: Mapped[str] = mapped_column(String(100))
 
-    projects = relationship("Project", secondary=project_contact_association, back_populates="contact_methods")
+    projects = relationship('Project', secondary=project_contact_association,
+                            back_populates='contact_methods')
 
 
 class Project(Base):
@@ -77,14 +86,15 @@ class Project(Base):
     creator_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey('categories.id'))
 
-    creator = relationship("User", back_populates="projects")
-    category = relationship("Category", back_populates="projects")
-    specializations = relationship("Specialization", secondary=project_specialization_association,
-                                   back_populates="projects")
-    contact_methods = relationship("ContactMethod", secondary=project_contact_association, back_populates="projects")
-    reviews = relationship("ProjectReview", back_populates="project")
-    participants = relationship("UserProject", back_populates="project", cascade="all, delete-orphan")
-    qualifications = relationship("ProjectQualificationEmployee", back_populates="project")
+    creator = relationship('User', back_populates='projects')
+    category = relationship('Category', back_populates='projects')
+    specializations = relationship('Specialization', secondary=project_specialization_association,
+                                   back_populates='projects')
+    contact_methods = relationship('ContactMethod', secondary=project_contact_association,
+                                   back_populates='projects')
+    reviews = relationship('ProjectReview', back_populates='project')
+    participants = relationship('UserProject', back_populates='project', cascade='all, delete-orphan')
+    qualifications = relationship('ProjectQualificationEmployee', back_populates='project')
 
 
 class SalaryType(Base):
@@ -105,9 +115,9 @@ class ProjectQualificationEmployee(Base):
     amount: Mapped[int] = mapped_column(Integer, nullable=False, default=0.0)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, server_default='EUR')
 
-    project = relationship("Project", back_populates="qualifications")
-    qualification = relationship("Qualification")
-    salary_type = relationship("SalaryType", foreign_keys=[salary_types_id])
+    project = relationship('Project', back_populates='qualifications')
+    qualification = relationship('Qualification')
+    salary_type = relationship('SalaryType', foreign_keys=[salary_types_id])
 
 
 class UserProject(Base):
@@ -117,8 +127,8 @@ class UserProject(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
     project_id: Mapped[int] = mapped_column(Integer, ForeignKey('projects.id'))
 
-    user = relationship("User")
-    project = relationship("Project")
+    user = relationship('User')
+    project = relationship('Project')
 
 
 class UserReview(Base):
@@ -131,9 +141,9 @@ class UserReview(Base):
     rating: Mapped[int] = mapped_column(Integer)
     comment: Mapped[str] = mapped_column(Text)
 
-    reviewer = relationship("User", foreign_keys=[reviewer_id], back_populates="reviews_given")
-    reviewed = relationship("User", foreign_keys=[reviewed_id], back_populates="reviews_received")
-    project = relationship("Project")
+    reviewer = relationship('User', foreign_keys=[reviewer_id], back_populates='reviews_given')
+    reviewed = relationship('User', foreign_keys=[reviewed_id], back_populates='reviews_received')
+    project = relationship('Project')
 
 
 class ProjectReview(Base):
@@ -145,8 +155,8 @@ class ProjectReview(Base):
     rating: Mapped[int] = mapped_column(Integer)
     comment: Mapped[str] = mapped_column(Text)
 
-    project = relationship("Project", back_populates="reviews")
-    reviewer = relationship("User")
+    project = relationship('Project', back_populates='reviews')
+    reviewer = relationship('User')
 
 
 class Qualification(Base):

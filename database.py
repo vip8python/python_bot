@@ -1,7 +1,8 @@
 import os
-import logging
+import json
 from datetime import datetime
 from dotenv import load_dotenv
+import logging.config
 from models import Project, Admin, Category, Qualification, ProjectQualificationEmployee, User, SalaryType
 from typing import Optional, Sequence
 from sqlalchemy import select
@@ -145,7 +146,8 @@ class DataBase:
         return new_project
 
     async def create_user(self, session: AsyncSession, username: str, contacts: str, description: str,
-                          telegram_id: str) -> User:
+                          telegram_id: str, experience: int, skills_list: list, country: str, languages_list: list,
+                          registered: datetime) -> User:
         try:
             existing_user = await self.is_user_registered(telegram_id)
             if existing_user:
@@ -155,11 +157,22 @@ class DataBase:
                 username=username,
                 contacts=contacts,
                 description=description,
-                telegram_id=telegram_id
+                telegram_id=telegram_id,
+                registered=registered,
+                experience=experience,
+                skills=json.dumps(skills_list),
+                rating=0.0,
+                country=country,
+                languages=json.dumps(languages_list)
             )
             session.add(new_user)
-            await session.commit()
+            try:
+                await session.commit()
+            except Exception as e:
+                logger.error(f'error {e}')
             return new_user
         except Exception as e:
             logger.error(f'Error in create_user: {e}', exc_info=True)
             raise
+        finally:
+            await session.close()
