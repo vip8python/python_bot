@@ -23,7 +23,7 @@ async def categories(message: Message, state: FSMContext):
             select(User).where(User.telegram_id == telegram_id)
         )
         user = user.scalar_one_or_none()
-        if user is None:
+        if not user:
             await message.answer("You need to be registered to create tasks. Please use /register to register.")
             return
         await message.answer('Select frameworks', reply_markup=await all_categories_kb())

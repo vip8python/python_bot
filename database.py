@@ -46,34 +46,6 @@ class DataBase:
             result = await session.scalars(select(Qualification))
         return result.all()
 
-    async def create_task(self, title, description, start_time, end_time, hourly_rate, participants_needed,
-                          repository_url,
-                          creator_id, category_id, employees_data):
-        async with self.Session() as session:
-            async with session.begin():
-                new_task = Project(
-                    title=title,
-                    description=description,
-                    start_time=start_time,
-                    end_time=end_time,
-                    hourly_rate=hourly_rate,
-                    participants_needed=participants_needed,
-                    repository_url=repository_url,
-                    creator_id=creator_id,
-                    category_id=category_id
-                )
-                session.add(new_task)
-                await session.flush()
-
-                for emp_data in employees_data:
-                    new_employee = ProjectQualificationEmployee(
-                        project_id=new_task.id,
-                        employees_count=emp_data['employees_count'],
-                        qualification_id=emp_data['qualification_id']
-                    )
-                    session.add(new_employee)
-                await session.commit()
-
     async def get_tasks_by_category(self, category_id):
         async with self.Session() as session:
             result = await session.execute(

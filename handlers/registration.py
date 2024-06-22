@@ -1,5 +1,4 @@
 import datetime
-
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -81,16 +80,13 @@ async def add_skill_experience(message: Message, state: FSMContext):
     experience = message.text
     data = await state.get_data()
     skill = data.get('skill')
-
     if not await is_integer(experience):
         await message.answer("Please enter a valid positive integer for experience.")
         return
-
     skills_list = data.get('skills_list', [])
     skills_list.append({'skill': skill, 'experience': int(experience)})
     await state.update_data(skills_list=skills_list)
-    await message.answer('Your skill added, please enter your next skill or select enter',
-                         reply_markup=skill_kb)
+    await message.answer('Your skill added, please enter your next skill or select enter', reply_markup=skill_kb)
 
 
 @router.callback_query(F.data == 'new_skill')
@@ -101,7 +97,7 @@ async def add_more_skills(call: CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == 'skills_finish')
 async def finish_skills(call: CallbackQuery, state: FSMContext):
-    await call.message.answer('Please enter the country where you live: ')
+    await call.message.answer('Please enter the country where you live:')
     await state.set_state(RegisterUser.country)
 
 
@@ -109,7 +105,7 @@ async def finish_skills(call: CallbackQuery, state: FSMContext):
 async def add_country(message: Message, state: FSMContext):
     country = message.text
     await state.update_data(country=country)
-    await message.answer('please enter the language in which you can communicate:')
+    await message.answer('Please enter the language in which you can communicate:')
     await state.set_state(RegisterUser.languages_list)
 
 
@@ -120,16 +116,16 @@ async def add_languages(message: Message, state: FSMContext):
     languages_list = data.get('languages_list', [])
     languages_list.append(languages)
     await state.update_data(languages_list=languages_list)
-    await message.answer('Languages added, you can add more language ', reply_markup=language_list_kb)
+    await message.answer('Languages added, you can add more language', reply_markup=language_list_kb)
 
 
 @router.callback_query(F.data == 'add_language')
 async def more_language(call: CallbackQuery, state: FSMContext):
-    await call.message.answer('Please enter another language: ')
+    await call.message.answer('Please enter another language:')
     await state.set_state(RegisterUser.languages_list)
 
 
-@router.callback_query(F.state == 'finish_registration')
+@router.callback_query(F.data == 'finish_registration')
 async def finish_registration(call: CallbackQuery, state: FSMContext):
     await finalize_registration(call.message, state)
 
@@ -139,16 +135,14 @@ async def finalize_registration(message: Message, state: FSMContext):
     username = user_data.get('username')
     contacts = user_data.get('contacts')
     description = user_data.get('description')
-    telegram_id = str(message.from_user.id)
+    telegram_id = str(message.chat.id)
     experience = int(user_data.get('experience', 0))
     skills_list = user_data.get('skills_list', [])
     country = user_data.get('country', 'world')
     languages_list = user_data.get('languages_list', [])
     registered = datetime.datetime.utcnow()
-
     async for session in db.get_async_session():
         try:
-            print('try')
             new_user = await db.create_user(session, username, contacts, description, telegram_id, experience,
                                             skills_list, country, languages_list, registered)
             await message.reply(f'Created new user: {new_user.username}')
