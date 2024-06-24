@@ -22,7 +22,7 @@ class RegistrationMiddleware(BaseMiddleware):
             user = user.scalar_one_or_none()
 
             if not user:
-                await event.answer("You need to be registered to create tasks. Please use /register to register.")
+                await event.answer('You need to be registered to create tasks. Please use /register to register.')
                 return
         return await handler(event, data)
 

@@ -30,6 +30,7 @@ class User(Base):
     description: Mapped[str] = mapped_column(Text)
     telegram_id: Mapped[str] = mapped_column(String(100))
     registered: Mapped[datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC))
+    updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC))
     experience: Mapped[int] = mapped_column(Integer, nullable=True, default=0)
     skills: Mapped[JSON] = mapped_column(JSON, nullable=True, default=list)
     rating: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
@@ -85,6 +86,7 @@ class Project(Base):
     repository_url: Mapped[str] = mapped_column(String(100))
     creator_id: Mapped[int] = mapped_column(Integer, ForeignKey('users.id'))
     category_id: Mapped[int] = mapped_column(Integer, ForeignKey('categories.id'))
+    created_time: Mapped[datetime] = mapped_column(DateTime, default=datetime.datetime.now(datetime.UTC))
 
     creator = relationship('User', back_populates='projects')
     category = relationship('Category', back_populates='projects')

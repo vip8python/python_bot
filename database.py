@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import logging.config
 from models import Project, Admin, Category, Qualification, ProjectQualificationEmployee, User, SalaryType
 from typing import Optional, Sequence
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 load_dotenv()
@@ -20,7 +20,7 @@ class DataBase:
         self.db_user = os.getenv('DB_USER')
         self.db_password = os.getenv('DB_PASSWORD')
         self.db_name = os.getenv('DB_NAME')
-        self.connect = f"postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}"
+        self.connect = f'postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}'
         self.async_engine = create_async_engine(self.connect, echo=True)
         self.Session = async_sessionmaker(bind=self.async_engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -81,13 +81,13 @@ class DataBase:
 
     async def save_task_to_db(self, session: AsyncSession, title: str, description: str, start_date: str,
                               end_date: str, employees_list: list, full_price: int, repository_url: str,
-                              telegram_id: str, category_id: int, salary_type_id: int) -> Project:
+                              telegram_id: str, category_id: int, salary_type_id: int, created_time: datetime) -> Project:
         start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
         end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
         user = await self.is_user_registered(telegram_id)
         if not user:
-            raise ValueError(f"User with telegram_id {telegram_id} not found.")
+            raise ValueError(f'User with telegram_id {telegram_id} not found.')
         creator_id = user.id
 
         new_project = Project(
@@ -99,7 +99,8 @@ class DataBase:
             participants_needed=sum([e['employees_count'] for e in employees_list]),
             repository_url=repository_url,
             creator_id=creator_id,
-            category_id=category_id
+            category_id=category_id,
+            created_time=created_time
         )
         session.add(new_project)
         await session.flush()
@@ -119,11 +120,11 @@ class DataBase:
 
     async def create_user(self, session: AsyncSession, username: str, contacts: str, description: str,
                           telegram_id: str, experience: int, skills_list: list, country: str, languages_list: list,
-                          registered: datetime) -> User:
+                          registered: datetime, updated: datetime) -> User:
         try:
             existing_user = await self.is_user_registered(telegram_id)
             if existing_user:
-                raise Exception(f"User with telegram_id already exists.")
+                raise Exception(f'User with telegram_id already exists.')
 
             new_user = User(
                 username=username,
@@ -135,7 +136,8 @@ class DataBase:
                 skills=json.dumps(skills_list),
                 rating=0.0,
                 country=country,
-                languages=json.dumps(languages_list)
+                languages=json.dumps(languages_list),
+                updated=updated
             )
             session.add(new_user)
             try:
@@ -148,3 +150,26 @@ class DataBase:
             raise
         finally:
             await session.close()
+
+    async def get_user_field(self, telegram_id: str, field: str):
+        print('get_us_field')
+        async with self.Session() as session:
+            result = await session.execute(select(getattr(User, field)).where(User.telegram_id == telegram_id))
+            print('res', result)
+            value = result.scalar_one_or_none()
+            if isinstance(value, str):
+                try:
+                    value = json.loads(value)
+                except json.JSONDecodeError:
+                    pass
+            return value
+
+    async def update_user_field(self, telegram_id: str, field: str, value):
+        update_date = datetime.utcnow()
+        async with self.Session() as session:
+            await session.execute(
+                update(User)
+                .where(User.telegram_id == telegram_id)
+                .values({field: value, 'updated': update_date})
+            )
+            await session.commit()

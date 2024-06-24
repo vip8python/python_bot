@@ -13,12 +13,12 @@ async def validate_date(message, state, field_name):
     try:
         user_date = datetime.strptime(message.text, '%Y-%m-%d')
         if user_date < datetime.now():
-            await message.answer(f"{field_name.capitalize()} date cannot be in the past. Please enter a future date.")
+            await message.answer(f'{field_name.capitalize()} date cannot be in the past. Please enter a future date.')
             return False
         await state.update_data({field_name: user_date.strftime('%Y-%m-%d')})
         return True
     except ValueError:
-        await message.answer(f"Please enter a valid date in YYYY-MM-DD format.")
+        await message.answer(f'Please enter a valid date in YYYY-MM-DD format.')
         return False
 
 

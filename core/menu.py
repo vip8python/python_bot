@@ -9,8 +9,12 @@ async def set_commands(bot: Bot):
             description='Start bot'
         ),
         BotCommand(
-            command='register',
+            command='register_user',
             description='Registration'
+        ),
+        BotCommand(
+            command='update_user',
+            description='Update user info'
         ),
         BotCommand(
             command='create_task',

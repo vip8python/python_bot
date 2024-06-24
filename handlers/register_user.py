@@ -4,8 +4,8 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 from database import DataBase
-from keyboards.registration_kb import enter_and_finish_kb, skill_kb, language_list_kb
-from states.registration import RegisterUser
+from keyboards.register_user_kb import enter_and_finish_kb, skill_kb, language_list_kb
+from states.register_user_state import RegisterUser
 from utils.validators import is_integer
 
 router = Router()
@@ -13,7 +13,7 @@ storage = MemoryStorage()
 db = DataBase()
 
 
-@router.message(F.text == '/register')
+@router.message(F.text == '/register_user')
 async def start_registration(message: Message, state: FSMContext):
     telegram_id = str(message.from_user.id)
     is_registered = await db.is_user_registered(telegram_id)
@@ -60,7 +60,7 @@ async def finish_registration(call: CallbackQuery, state: FSMContext):
 async def add_experience(message: Message, state: FSMContext):
     experience = message.text
     if not await is_integer(experience):
-        await message.answer("Please enter a valid positive integer for experience.")
+        await message.answer('Please enter a valid positive integer for experience.')
         return
     await state.update_data(experience=experience)
     await message.answer('Please enter your first skill')
@@ -81,7 +81,7 @@ async def add_skill_experience(message: Message, state: FSMContext):
     data = await state.get_data()
     skill = data.get('skill')
     if not await is_integer(experience):
-        await message.answer("Please enter a valid positive integer for experience.")
+        await message.answer('Please enter a valid positive integer for experience.')
         return
     skills_list = data.get('skills_list', [])
     skills_list.append({'skill': skill, 'experience': int(experience)})
@@ -141,10 +141,12 @@ async def finalize_registration(message: Message, state: FSMContext):
     country = user_data.get('country', 'world')
     languages_list = user_data.get('languages_list', [])
     registered = datetime.datetime.utcnow()
+    updated = datetime.datetime.utcnow()
+
     async for session in db.get_async_session():
         try:
             new_user = await db.create_user(session, username, contacts, description, telegram_id, experience,
-                                            skills_list, country, languages_list, registered)
+                                            skills_list, country, languages_list, registered, updated)
             await message.reply(f'Created new user: {new_user.username}')
         except Exception as e:
             await message.answer(f'Error: {e}')

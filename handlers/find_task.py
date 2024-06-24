@@ -33,16 +33,16 @@ async def find_result(call: CallbackQuery):
             logger.error(f'Error: {e}')
 
     if projects:
-        projects_list = "\n".join(
-            [f"Project: {project.title}\n"
-             f"Description: {project.description}\n"
-             f"Price: {project.salary}eur.\n"
-             f"Data: from {project.start_time} to {project.end_time}\n"
-             f"Workers needed: {project.participants_needed}\n"
-             f"Repository: {project.repository_url}\n"
-             f"Employees:\n" + "".join(
-                [f"{employee.employees_count} employees with qualification: {employee.qualification.name}\n"
-                 f"Salary: {employee.amount}{employee.currency} - {employee.salary_type.name}\n"
+        projects_list = '\n'.join(
+            [f'Project: {project.title}\n'
+             f'Description: {project.description}\n'
+             f'Price: {project.salary}eur.\n'
+             f'Data: from {project.start_time} to {project.end_time}\n'
+             f'Workers needed: {project.participants_needed}\n'
+             f'Repository: {project.repository_url}\n'
+             f'Employees:\n' + ''.join(
+                [f'{employee.employees_count} employees with qualification: {employee.qualification.name}\n'
+                 f'Salary: {employee.amount}{employee.currency} - {employee.salary_type.name}\n'
                  for employee in project.qualifications]
             ) for project in projects]
         )

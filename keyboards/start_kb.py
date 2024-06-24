@@ -8,3 +8,10 @@ start_kb = ReplyKeyboardMarkup(keyboard=[
 ], resize_keyboard=True,
     input_field_placeholder='....',
     one_time_keyboard=True)
+
+start_register_kb = ReplyKeyboardMarkup(keyboard=[
+    [
+        KeyboardButton(text='register')
+    ]
+], resize_keyboard=True,
+    one_time_keyboard=True)

@@ -14,7 +14,8 @@ from models import Base
 from handlers.create_task import router as create_router
 from handlers.start import router as start_router
 from handlers.find_task import router as find_router
-from handlers.registration import router as register_router
+from handlers.register_user import router as register_router
+from handlers.update_user import router as update_user_router
 
 load_dotenv()
 
@@ -70,7 +71,7 @@ async def create_tables():
     db_user = os.getenv('DB_USER')
     db_password = os.getenv('DB_PASSWORD')
     db_name = os.getenv('DB_NAME')
-    connect = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    connect = f'postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
     engine = create_async_engine(connect, echo=True)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -81,14 +82,17 @@ async def main():
     dp.include_router(start_router)
     dp.include_router(register_router)
 
-    allowed_commands_create = ["/create_task"]
-    allowed_commands_find = ["/find_task"]
+    allowed_commands_create = ['/create_task']
+    allowed_commands_find = ['/find_task']
+    allowed_commands_update_user = ['/update_user']
 
     create_router.message.middleware.register(get_registration_middleware(allowed_commands_create))
     find_router.message.middleware.register(get_registration_middleware(allowed_commands_find))
+    update_user_router.message.middleware.register(get_registration_middleware(allowed_commands_update_user))
 
     dp.include_router(create_router)
     dp.include_router(find_router)
+    dp.include_router(update_user_router)
 
     try:
         logger.info('Starting bot ...')
